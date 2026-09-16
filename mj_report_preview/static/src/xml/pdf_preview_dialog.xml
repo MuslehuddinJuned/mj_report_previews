@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mj_report_preview.PdfPreviewDialog">
+        <Dialog size="'fs'"
+                title="dialogTitle"
+                withBodyPadding="false"
+                contentClass="'o_mj_pdf_preview_content'">
+            <div class="o_mj_pdf_preview">
+                <!-- t-key forces a reload so the browser applies the new zoom -->
+                <iframe t-key="state.zoom"
+                        t-att-src="viewerUrl"
+                        t-att-title="props.filename"/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onDownload">
+                    <i class="fa fa-download me-1"/>Download
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    Close
+                </button>
+                <div class="d-flex align-items-center gap-2 ms-md-3">
+                    <label class="mb-0 text-muted" for="mj_pdf_preview_zoom">Zoom</label>
+                    <select id="mj_pdf_preview_zoom"
+                            class="form-select form-select-sm w-auto"
+                            t-on-change="onZoomChange">
+                        <option t-foreach="zoomLevels" t-as="level" t-key="level.value"
+                                t-att-value="level.value"
+                                t-att-selected="level.value === state.zoom">
+                            <t t-esc="level.label"/>
+                        </option>
+                    </select>
+                </div>
+                <span class="text-muted ms-auto d-none d-lg-inline align-self-center">
+                    <t t-esc="props.filename"/>
+                </span>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>
