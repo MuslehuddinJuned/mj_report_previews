@@ -39,19 +39,27 @@ function parseFilename(contentDisposition) {
  * and of the `onClose` callback.
  */
 async function pdfPreviewHandler(action, options, env) {
-    if (action.report_type !== "qweb-pdf") {
+    // Odoo 20: PDF reports may be "qweb-pdf" or "qweb-pdf-<engine_name>".
+    const reportType = action.report_type || "";
+    if (!reportType.startsWith("qweb-pdf")) {
         return false;
     }
+    const engineName = reportType.startsWith("qweb-pdf-") ? reportType.slice(9) : null;
     const actionContext = action.context || {};
     if (actionContext.skip_pdf_preview) {
         return false;
     }
 
-    // Same wkhtmltopdf sanity check as the standard flow: when it is missing or
-    // broken, let Odoo fall back to its HTML report.
+    // Same PDF engine sanity check as the standard flow (Odoo 20 route): when
+    // the engine is missing or broken, let Odoo fall back to its HTML report.
     try {
-        pdfPreviewHandler.wkhtmltopdfStatusProm ||= rpc("/report/check_wkhtmltopdf");
-        const status = await pdfPreviewHandler.wkhtmltopdfStatusProm;
+        const cacheKey = engineName || "__default__";
+        pdfPreviewHandler.engineStatusProms ||= {};
+        pdfPreviewHandler.engineStatusProms[cacheKey] ||= rpc(
+            "/report/get_pdf_engine_state",
+            engineName ? { engine_name: engineName } : {}
+        );
+        const status = await pdfPreviewHandler.engineStatusProms[cacheKey];
         if (!["upgrade", "ok"].includes(status)) {
             return false;
         }
@@ -67,7 +75,7 @@ async function pdfPreviewHandler(action, options, env) {
     env.services.ui.block();
     try {
         const formData = new FormData();
-        formData.append("data", JSON.stringify([url, action.report_type]));
+        formData.append("data", JSON.stringify([url, reportType]));
         formData.append("context", JSON.stringify(downloadContext));
         formData.append("token", "dummy-because-api-expects-one");
         if (odoo.csrf_token) {
@@ -100,7 +108,7 @@ async function pdfPreviewHandler(action, options, env) {
             {
                 objectUrl,
                 filename,
-                title: action.display_name || action.name || _t("Print Preview"),
+                title: String(action.display_name || action.name || _t("Print Preview")),
             },
             {
                 onClose: () => {

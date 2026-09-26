@@ -1,0 +1,6 @@
+// wkhtmltopdf may display Odoo's phone ligature name as text when the icon
+// font is unavailable. Use a Unicode handset glyph for the PDF report icon.
+.oi.oi-filled[data-icon="phone"]:not([data-icon=""]):not([data-icon^="oi_"])::before {
+    content: "☎" !important;
+    font-family: "DejaVu Sans", sans-serif !important;
+}

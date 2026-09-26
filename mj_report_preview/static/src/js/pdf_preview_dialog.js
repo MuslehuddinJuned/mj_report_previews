@@ -1,4 +1,4 @@
-import { Component, useState } from "@odoo/owl";
+import { Component, signal, t, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
@@ -36,25 +36,25 @@ export function getStoredZoom() {
 export class PdfPreviewDialog extends Component {
     static template = "mj_report_preview.PdfPreviewDialog";
     static components = { Dialog };
-    static props = {
-        close: Function,
-        objectUrl: String,
-        filename: String,
-        title: { type: String, optional: true },
-    };
+    props = useProps({
+        close: t.function(),
+        objectUrl: t.string(),
+        filename: t.string(),
+        title: t.string().optional(),
+    });
 
     setup() {
         this.zoomLevels = ZOOM_LEVELS;
-        this.state = useState({ zoom: getStoredZoom() });
+        this.state = { zoom: signal(getStoredZoom()) };
     }
 
     get dialogTitle() {
-        return this.props.title || _t("Print Preview");
+        return String(this.props.title || _t("Print Preview"));
     }
 
     /** PDF open parameters understood by the browsers' built-in viewers. */
     get zoomParam() {
-        const zoom = this.state.zoom;
+        const zoom = this.state.zoom();
         if (zoom === "fit-width") {
             return "view=FitH";
         }
@@ -69,9 +69,9 @@ export class PdfPreviewDialog extends Component {
     }
 
     onZoomChange(ev) {
-        this.state.zoom = ev.target.value;
+        this.state.zoom.set(ev.target.value);
         try {
-            browser.localStorage.setItem(ZOOM_STORAGE_KEY, this.state.zoom);
+            browser.localStorage.setItem(ZOOM_STORAGE_KEY, this.state.zoom());
         } catch {
             // private mode / storage full: the zoom still applies to this preview
         }

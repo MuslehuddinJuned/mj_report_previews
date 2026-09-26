@@ -1,6 +1,6 @@
 {
     'name': 'Report PDF Preview',
-    'version': '19.0.1.0.0',
+    'version': '20.0.1.0.0',
     'summary': 'Always preview a PDF report before downloading it',
     'description': """
 Report PDF Preview
@@ -30,10 +30,13 @@ the context of its action.
             'mj_report_preview/static/src/xml/pdf_preview_dialog.xml',
             'mj_report_preview/static/src/js/report_preview_handler.js',
         ],
+        'web.report_assets_common': [
+            'mj_report_preview/static/src/scss/report_phone_icon.scss',
+        ],
     },
     'images': ['static/description/banner.png'],
     'installable': True,
-    'auto_install': True,
-    'application': False,
+    'auto_install': False,
+    'application': True,
     'license': 'LGPL-3',
 }

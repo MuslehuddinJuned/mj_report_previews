@@ -3,17 +3,17 @@
 
     <t t-name="mj_report_preview.PdfPreviewDialog">
         <Dialog size="'fs'"
-                title="dialogTitle"
+                title="this.dialogTitle"
                 withBodyPadding="false"
                 contentClass="'o_mj_pdf_preview_content'">
             <div class="o_mj_pdf_preview">
                 <!-- t-key forces a reload so the browser applies the new zoom -->
-                <iframe t-key="state.zoom"
-                        t-att-src="viewerUrl"
-                        t-att-title="props.filename"/>
+                <iframe t-key="this.state.zoom()"
+                        t-att-src="this.viewerUrl"
+                        t-att-title="this.props.filename"/>
             </div>
             <t t-set-slot="footer">
-                <button class="btn btn-primary" t-on-click="onDownload">
+                <button class="btn btn-primary" t-on-click="this.onDownload">
                     <i class="fa fa-download me-1"/>Download
                 </button>
                 <button class="btn btn-secondary" t-on-click="() => this.props.close()">
@@ -23,16 +23,16 @@
                     <label class="mb-0 text-muted" for="mj_pdf_preview_zoom">Zoom</label>
                     <select id="mj_pdf_preview_zoom"
                             class="form-select form-select-sm w-auto"
-                            t-on-change="onZoomChange">
-                        <option t-foreach="zoomLevels" t-as="level" t-key="level.value"
+                            t-on-change="this.onZoomChange">
+                        <option t-foreach="this.zoomLevels" t-as="level" t-key="level.value"
                                 t-att-value="level.value"
-                                t-att-selected="level.value === state.zoom">
+                                t-att-selected="level.value === this.state.zoom()">
                             <t t-esc="level.label"/>
                         </option>
                     </select>
                 </div>
                 <span class="text-muted ms-auto d-none d-lg-inline align-self-center">
-                    <t t-esc="props.filename"/>
+                    <t t-esc="this.props.filename"/>
                 </span>
             </t>
         </Dialog>
